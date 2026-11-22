@@ -1,0 +1,31 @@
+name: Convert LastWave to Prism
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Only convert this playlist title (leave empty for all)"
+        required: false
+        default: ""
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ytmusicapi
+      - name: Run converter
+        run: |
+          if [ -n "${{ github.event.inputs.only }}" ]; then
+            python lastwave_to_prism.py LastWave_All_Playlists_Updated.json --only "${{ github.event.inputs.only }}"
+          else
+            python lastwave_to_prism.py LastWave_All_Playlists_Updated.json
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prism-backup
+          path: |
+            Prism_backup_LastWave_matched.zip
+            unmatched.txt
